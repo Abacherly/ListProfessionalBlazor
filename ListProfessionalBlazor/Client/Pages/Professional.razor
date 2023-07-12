@@ -1,0 +1,89 @@
+﻿@page "/professional"
+@page "/professional/{id:int}"
+
+@inject IListProfessionalService ListProfessionalService
+
+@if (Id == null) {
+  <PageTitle>Cadastrar novo Profissional</PageTitle>
+    <h3>adastrar novo Profissional</h3>
+}
+else
+{
+    <PageTitle>Editar @professional.Name</PageTitle>
+    <h3>Editar @professional.Name</h3>
+    
+}
+
+<EditForm Model="professional" OnSubmit="HandleSubmit">
+    <div>
+        <label for="name">Nome</label>
+        <InputText id="name" @bind-Value="professional.Name" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="position">Cargo</label>
+        <InputText id="position" @bind-Value="professional.Position" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="years">Tempo de Empresa</label>
+        <InputText id="years" @bind-Value="professional.Years" class="form-control"></InputText>
+    </div>
+    <div>
+        <label>Tipo de Trabalho</label><br />
+        <InputSelect @bind-Value="professional.WorkId" class="form-select">
+            @foreach (var work in ListProfessionalService.Works)
+            {
+                <option Value="@work.Id">@work.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteProfessional">Deletar Profissional</button>
+
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    ListProfessional professional = new ListProfessional { Work = new Work() };
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Salvar novo Profissional" : "Editar novo Profissional";
+        await ListProfessionalService.GetWorks();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            professional.Work = ListProfessionalService.Works[0];
+            professional.WorkId = professional.Work.Id;
+        }
+        else
+        {
+            professional = await ListProfessionalService.GetSingleProfessional((int)Id);
+        }
+    }
+
+    async void HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await ListProfessionalService.CreateProfessional(professional);
+        }
+        else
+        {
+            await ListProfessionalService.UpdateProfessional(professional);
+        }
+    }
+    async Task DeleteProfessional()
+    {
+        await ListProfessionalService.DeleteProfessional(professional.Id);
+    }
+}

@@ -1,0 +1,56 @@
+﻿@page "/listprofessionals"
+
+@inject IListProfessionalService ListProfessionalService
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Lista de Profissionais</PageTitle>
+
+<h3>Lista de Profissionais</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th> Nome </th>
+            <th> Cargo </th>
+            <th> Tempo de Empresa </th>
+            <th> Tipo de Trabalho </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var professional in ListProfessionalService.Professionals)
+        {
+            <tr>
+                <td>@professional.Name</td>
+                <td>@professional.Position</td>
+                <td>@professional.Years</td>
+                <td>@professional.Work.Name</td>
+            <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowProfessional(professional.Id))"><i class="oi oi-pencil"></i></button>
+            </td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+<button class="btn btn-primary" @onclick="CreateNewProfessional">Criar novo Profissional</button>
+
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ListProfessionalService.GetListProfessionals();
+    }
+
+    void ShowProfessional(int id)
+    {
+        NavigationManager.NavigateTo($"professional/{id}");
+    }
+
+    void CreateNewProfessional()
+    {
+        NavigationManager.NavigateTo("/professional");
+    }
+}
